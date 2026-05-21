@@ -1,0 +1,19 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    git curl ca-certificates build-essential cmake ninja-build python3 python3-pip \
+    bison flex gawk tcl-dev libreadline-dev pkg-config libboost-all-dev \
+    libeigen3-dev libffi-dev zlib1g-dev xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/openXC7/toolchain-installer.git /toolchain-installer
+
+RUN cd /toolchain-installer && bash ./toolchain-sources-builder.sh
+
+ENV PATH="/opt/openxc7/bin:${PATH}"
+ENV PRJXRAY_DB_DIR="/opt/openxc7/share/prjxray-db"
+ENV NEXTPNR_XILINX_CHIPDB="/opt/openxc7/share/nextpnr-xilinx/chipdb"
+
+WORKDIR /work

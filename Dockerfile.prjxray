@@ -1,0 +1,9 @@
+FROM openxc7
+
+RUN apt-get update && apt-get install -y python3-setuptools python3-wheel python3-pip git \
+    && git clone --recursive https://github.com/f4pga/prjxray.git /opt/prjxray \
+    && cd /opt/prjxray \
+    && pip3 install -r requirements.txt \
+    && pip3 install -e .
+
+WORKDIR /work
