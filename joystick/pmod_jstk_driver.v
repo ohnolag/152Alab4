@@ -21,11 +21,16 @@ module pmod_jstk_driver(
     output wire        data_ready
 );
 
+    localparam [9:0] Y_CENTER = 10'd512;
+    localparam [9:0] Y_DEADZONE = 10'd175;
+
     wire i_sclk;
     wire get_byte;
     wire byte_busy;
     wire [7:0] snd_data;
     wire [7:0] rx_data;
+    wire y_pulled_up;
+    wire y_pulled_down;
 
     clk_div_jstk clock_for_spi(
         .clk(clk),
@@ -66,13 +71,14 @@ module pmod_jstk_driver(
     assign x_pos = {raw_data[25:24], raw_data[39:32]};
     assign y_pos = {raw_data[9:8], raw_data[23:16]};
 
+    assign y_pulled_up = y_pos > (Y_CENTER + Y_DEADZONE);
+    assign y_pulled_down = y_pos < (Y_CENTER - Y_DEADZONE);
+
     assign joystick_start =
         btn_jstk |
         btn_1 |
         btn_2 |
-        (x_pos > 10'd700) |
-        (x_pos < 10'd300) |
-        (y_pos > 10'd700) |
-        (y_pos < 10'd300);
+        y_pulled_up |
+        y_pulled_down;
 
 endmodule
