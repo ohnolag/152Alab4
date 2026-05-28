@@ -1,3 +1,4 @@
+
 `timescale 1ns / 1ps
 
 module spi_ctrl_5byte(
@@ -24,6 +25,7 @@ module spi_ctrl_5byte(
     reg [2:0] state = IDLE;
     reg [2:0] byte_count = 3'd0;
     reg [39:0] tmp_shift = 40'd0;
+    wire [39:0] next_shift = {tmp_shift[31:0], rx_data};
 
     always @(negedge clk) begin
         if (rst) begin
@@ -76,19 +78,20 @@ module spi_ctrl_5byte(
                 CHECK: begin
                     ss <= 1'b0;
                     get_byte <= 1'b0;
-                    tmp_shift <= {tmp_shift[31:0], rx_data};
+                    tmp_shift <= next_shift;
 
-                    if (byte_count == 3'd5)
+                    if (byte_count == 3'd5) begin
+                        dout <= next_shift;
                         state <= DONE;
-                    else
+                    end else begin
                         state <= INIT;
+                    end
                 end
 
                 DONE: begin
                     ss <= 1'b1;
                     get_byte <= 1'b0;
                     snd_data <= 8'd0;
-                    dout <= tmp_shift;
                     data_ready <= 1'b1;
 
                     if (!snd_rec)
