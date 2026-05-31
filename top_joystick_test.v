@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
 module top_joystick_test(
-    input  wire clk,        // Basys 3 100 MHz clock
-    input  wire btnC,       // reset button
+    input  wire clk,
+    input  wire btnC,
 
     input  wire jstk_miso,
     output wire jstk_ss,
@@ -11,6 +11,9 @@ module top_joystick_test(
 
     output wire [15:0] led
 );
+
+    localparam [9:0] Y_CENTER = 10'd512;
+    localparam [9:0] Y_DEADZONE = 10'd175;
 
     wire poll;
     wire [39:0] raw_data;
@@ -21,15 +24,13 @@ module top_joystick_test(
     wire btn_2;
     wire joystick_start;
     wire data_ready;
+
     reg [22:0] heartbeat_count = 23'd0;
     reg [23:0] ready_count = 24'd0;
 
-    wire left   = x_pos < 10'd350;
-    wire right  = x_pos > 10'd650;
-    wire down   = y_pos < 10'd350;
-    wire up     = y_pos > 10'd650;
-    wire center = (x_pos > 10'd450) && (x_pos < 10'd575) &&
-                  (y_pos > 10'd450) && (y_pos < 10'd575);
+    wire pulled_down = y_pos < (Y_CENTER - Y_DEADZONE);
+    wire pulled_up = y_pos > (Y_CENTER + Y_DEADZONE);
+    wire centered = !pulled_down && !pulled_up;
 
     always @(posedge clk) begin
         if (btnC) begin
@@ -72,20 +73,19 @@ module top_joystick_test(
         .data_ready(data_ready)
     );
 
-    // Obvious hardware test display.
     assign led[0] = btn_jstk;
     assign led[1] = btn_1;
     assign led[2] = btn_2;
-    assign led[3] = left;
-    assign led[4] = right;
-    assign led[5] = down;
-    assign led[6] = up;
-    assign led[7] = center;
+    assign led[3] = 1'b0;
+    assign led[4] = 1'b0;
+    assign led[5] = pulled_down;
+    assign led[6] = pulled_up;
+    assign led[7] = centered;
 
-    // Coarse binary position readout, useful after directions work.
-    assign led[10:8] = x_pos[9:7];
-    assign led[13:11] = y_pos[9:7];
-
+    assign led[10:8] = y_pos[9:7];
+    assign led[11] = joystick_start;
+    assign led[12] = 1'b0;
+    assign led[13] = 1'b0;
     assign led[14] = ready_count != 24'd0;
     assign led[15] = heartbeat_count[22];
 
