@@ -32,11 +32,16 @@ module slot_machine_top(
     wire tick50Hz;
 
     // Joystick signals from joystick/pmod_jstk_driver.v.
+    localparam [9:0] Y_CENTER = 10'd512;
+    localparam [9:0] Y_DEADZONE = 10'd175;
+
     wire joystick_poll;
     wire [9:0] joystick_y_pos;
     wire joystick_pulled_down;
     wire joystick_pulled_up;
+    wire joystick_data_ready;
     wire spin_request;
+    reg joystick_sample_seen = 1'b0;
 
     // Slot machine state/control signals from slotFSM.v.
     wire spinning;
@@ -54,9 +59,16 @@ module slot_machine_top(
     wire win_led;
     wire lose_led;
 
-    assign joystick_pulled_down = joystick_y_pos < 10'd337;
-    assign joystick_pulled_up = joystick_y_pos > 10'd687;
-    assign spin_request = joystick_pulled_down || joystick_pulled_up;
+    assign joystick_pulled_down = joystick_y_pos < (Y_CENTER - Y_DEADZONE);
+    assign joystick_pulled_up = joystick_y_pos > (Y_CENTER + Y_DEADZONE);
+    assign spin_request = joystick_data_ready && (joystick_pulled_down || joystick_pulled_up);
+
+    always @(posedge clk) begin
+        if (rst)
+            joystick_sample_seen <= 1'b0;
+        else if (joystick_data_ready)
+            joystick_sample_seen <= 1'b1;
+    end
 
     clock timing(
         .clk(clk),
@@ -86,7 +98,7 @@ module slot_machine_top(
         .btn_1(),
         .btn_2(),
         .joystick_start(),
-        .data_ready()
+        .data_ready(joystick_data_ready)
     );
 
     slotFSM game_fsm(
@@ -146,15 +158,20 @@ module slot_machine_top(
         .an(an)
     );
 
-    // LED assignment for demo/rubric:
+    // LED assignment for demo/rubric/debug:
+    // led[0] shows a valid joystick sample has arrived since reset.
+    // led[1] pulses when a new joystick sample is ready.
+    // led[2] is on when the Y axis is pulled down.
+    // led[3] is on when the Y axis is pulled up.
+    // led[4] pulses when a valid joystick movement starts a spin.
     // led[11] is on while the reels are spinning/stopping.
     // led[13] turns on after the reels stop if the player loses.
     // led[14] turns on after the reels stop if the player wins.
-    assign led[0] = 1'b0;
-    assign led[1] = 1'b0;
-    assign led[2] = 1'b0;
-    assign led[3] = 1'b0;
-    assign led[4] = 1'b0;
+    assign led[0] = joystick_sample_seen;
+    assign led[1] = joystick_data_ready;
+    assign led[2] = joystick_pulled_down;
+    assign led[3] = joystick_pulled_up;
+    assign led[4] = spin_request;
     assign led[5] = 1'b0;
     assign led[6] = 1'b0;
     assign led[7] = 1'b0;

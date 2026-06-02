@@ -46,7 +46,10 @@ module slotFSM(
                 end
 
                 RESULT: begin
-                    state <= RESULT;
+                    if (spin_request)
+                        state <= SPIN_ALL;
+                    else
+                        state <= RESULT;
                 end
 
                 default: begin
