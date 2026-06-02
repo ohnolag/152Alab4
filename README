@@ -1,0 +1,29 @@
+to build -> 
+
+cd ~/152Alab4
+
+docker build -f Dockerfile.openxc7 -t openxc7 .
+docker build -f Dockerfile.prjxray -t openxc7-prjxray .
+
+docker run --rm \
+  -v /Users/1kiteogawa/Desktop/152Alab4:/work \
+  -w /work \
+  openxc7-prjxray \
+  make clean
+
+docker run --rm \
+  -v /Users/1kiteogawa/Desktop/152Alab4:/work \
+  -w /work \
+  openxc7-prjxray \
+  make \
+  TOP=slot_machine_top \
+  "SOURCES=slot_machine_top.v clocks.v reelCounter.v slotFSM.v winLogic.v sevenSegDecoder.v sevenSegMux.v joystick/joystick_poll_timer.v joystick/pmod_jstk_driver.v joystick/spi_ctrl_5byte.v joystick/spi_mode0.v joystick/clk_div_jstk.v"
+
+generate bitstream: 
+
+ls -lh build/slot_machine_top.bit
+
+
+flash: 
+
+openFPGALoader -b basys3 build/slot_machine_top.bit

@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module winLogic (
     input [3:0] reel1,
     input [3:0] reel2,
