@@ -6,13 +6,13 @@ docker build -f Dockerfile.openxc7 -t openxc7 .
 docker build -f Dockerfile.prjxray -t openxc7-prjxray .
 
 docker run --rm \
-  -v /Users/1kiteogawa/Desktop/152Alab4:/work \
+  -v ~/152Alab4:/work \
   -w /work \
   openxc7-prjxray \
   make clean
 
 docker run --rm \
-  -v /Users/1kiteogawa/Desktop/152Alab4:/work \
+  -v ~/152Alab4:/work \
   -w /work \
   openxc7-prjxray \
   make \
