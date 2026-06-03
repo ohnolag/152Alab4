@@ -121,7 +121,7 @@ module slot_machine_top(
         .value(reel1)
     );
 
-    reelCounter #(.START_VALUE(4'd3), .STEP(4'd3)) reel_two(
+    reelCounter #(.START_VALUE(4'd2), .STEP(4'd3)) reel_two(
         .clk(clk),
         .rst(rst),
         .tick(tick50Hz),
@@ -129,7 +129,7 @@ module slot_machine_top(
         .value(reel2)
     );
 
-    reelCounter #(.START_VALUE(4'd7), .STEP(4'd7)) reel_three(
+    reelCounter #(.START_VALUE(4'd3), .STEP(4'd7)) reel_three(
         .clk(clk),
         .rst(rst),
         .tick(tick50Hz),
