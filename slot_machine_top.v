@@ -1,12 +1,5 @@
 `timescale 1ns / 1ps
 
-// Top-level for the final Lab 4 slot machine.
-// Scoring/rubric behavior:
-//   - PMOD joystick Y-axis movement starts a round.
-//   - Three reel counters cycle 0-9 while enabled.
-//   - The FSM stops reel 1, reel 2, and reel 3 one-by-one.
-//   - winLogic asserts LED14 for a three-of-a-kind win and LED13 for loss.
-//   - btnC resets the whole game back to idle.
 module slot_machine_top(
     input  wire        clk,        // Basys 3 100 MHz clock
     input  wire        btnC,       // reset game
